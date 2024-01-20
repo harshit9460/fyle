@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <title>GitHub Repositories</title>
+</head>
+<body>
+
+  <!-- Container for the entire page -->
+  <div class="container mt-5">
+    <!-- Heading -->
+    <h1 class="mb-4">GitHub Repositories</h1>
+
+    <!-- Form to input GitHub username -->
+    <form id="usernameForm">
+      <div class="form-group">
+        <label for="username">Enter GitHub Username:</label>
+        <input type="text" class="form-control" id="username" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Fetch Repositories</button>
+    </form>
+
+    <!-- Container to display repositories -->
+    <div id="repositories" class="mt-4"></div>
+  </div>
+
+  <!-- Include necessary Bootstrap and jQuery scripts -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+  <!-- JavaScript code for handling form submission and API call -->
+ <script>
+  $('#usernameForm').submit(function (event) {
+    event.preventDefault();
+
+    const username = $('#username').val();
+    if (!username) {
+      alert('Please enter a GitHub username.');
+      return;
+    }
+
+    fetchRepositories(username);
+  });
+
+  function fetchRepositories(username) {
+    const apiUrl = `https://api.github.com/users/${username}/repos`;
+
+    $.ajax({
+      url: apiUrl,
+      method: 'GET',
+      success: function (data) {
+        displayRepositories(data);
+      },
+      error: function (error) {
+        alert(`Error fetching repositories: ${error.responseJSON.message}`);
+      }
+    });
+  }
+
+  function displayRepositories(repositories) {
+    $('#repositories').empty();
+
+    if (repositories.length === 0) {
+      $('#repositories').append('<p>No repositories found for the given user.</p>');
+      return;
+    }
+
+    const table = $('<table class="table"></table>');
+    const thead = $('<thead><tr><th>Name</th><th>Language</th><th>Topics</th></tr></thead>');
+    const tbody = $('<tbody></tbody>');
+
+    repositories.forEach(repo => {
+      const topics = repo.topics.join(', ');
+
+      const row = $(`<tr><td>${repo.name}</td><td>${repo.language}</td><td>${topics}</td></tr>`);
+      tbody.append(row);
+    });
+
+    table.append(thead);
+    table.append(tbody);
+    $('#repositories').append(table);
+  }
+</script>
+</body>
+</html>
